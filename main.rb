@@ -1,19 +1,23 @@
 require_relative 'book'
 require_relative 'user'
 require_relative 'library'
+require 'sqlite3'
 
-# init books
-books = [
-  Book.new("Harry Potter and the Goblet of fire", "J.K Rowling", "978-1338878950" , true), # My favorite book
-  Book.new("Harry Potter and the Chamber of Secrets", "J.K Rowling", "978-1338878936" , true)
-]
+# Ensure DB and tables exist
+require_relative 'db_setup'
 
-# init users
-users = [
-  User.new("Adham", 1, [])
-]
+# Seed initial data if not present
+if Book.find_by_isbn("978-1338878950").nil?
+  Book.create("Harry Potter and the Goblet of fire", "J.K Rowling", "978-1338878950")
+end
+if Book.find_by_isbn("978-1338878936").nil?
+  Book.create("Harry Potter and the Chamber of Secrets", "J.K Rowling", "978-1338878936")
+end
+if User.find_by_id(1).nil?
+  User.create("Adham", 1)
+end
 
-library = Library.new(books, users)
+library = Library.new
 
 puts "Welcome to the Library Management System"
 
@@ -22,7 +26,6 @@ def prompt(msg)
   gets.chomp
 end
 
-# Main loop for user interaction
 loop do
   puts "\nChoose an action:"
   puts "1. Add a new book"
@@ -41,14 +44,14 @@ loop do
     title = prompt("Book title: ")
     author = prompt("Author: ")
     isbn = prompt("ISBN: ")
-    library.add_book(Book.new(title, author, isbn, true))
+    library.add_book(Book.new(id: nil, title: title, author: author, isbn: isbn))
   when "2"
     name = prompt("User name: ")
     id = prompt("User ID (number): ").to_i
-    if users.any? { |u| u.id == id }
+    if User.find_by_id(id)
       puts "User ID already exists."
     else
-      user = User.new(name, id, [])
+      user = User.new(id: id, name: name)
       library.register_user(user)
     end
   when "3"
@@ -65,7 +68,7 @@ loop do
     library.receive_book(user_id, isbn)
   when "6"
     user_id = prompt("User ID: ").to_i
-    user = users.find { |u| u.id == user_id }
+    user = User.find_by_id(user_id)
     if user
       user.list_borrowed_books
     else
@@ -76,10 +79,7 @@ loop do
     library.remove_book(isbn)
   when "8"
     puts "All books in the library:"
-    books.each do |book|
-      status = book.available ? "Available" : "Checked out"
-      puts "#{book.title} by #{book.author} (ISBN: #{book.isbn}) - #{status}"
-    end
+    library.list_all_books
   when "9"
     break
   else
