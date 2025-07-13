@@ -28,4 +28,6 @@ This is a simple little library management system I built to help me learn Ruby.
 - `book.rb` — Book class
 - `user.rb` — User class
 - `library.rb` — Library class
+## Note
 
+For the original in-memory implementation, see the `legacy` branch.
