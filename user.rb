@@ -14,17 +14,17 @@ class User
       @borrowed_books << book
       puts "#{@name} has borrowed #{book.title}"
     else
-      puts "#{book.title} is not available for borrowing"
+      puts "Error: #{book.title} is not available for borrowing"
     end
   end
   # return a book if it was borrowed by the user or notify the user if not  
   def return_book(book)
     if @borrowed_books.include?(book)
-      book.available = true
+      book.return_book
       @borrowed_books.delete(book)
       puts "#{@name} has returned #{book.title}"
     else
-      puts "#{@name} does not have #{book.title} borrowed"
+      puts "Error: #{@name} does not have #{book.title} borrowed"
     end
   end
 

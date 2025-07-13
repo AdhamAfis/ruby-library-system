@@ -5,14 +5,20 @@ class Library
     @users = users
   end
 
+
   def add_book(book)
     @books << book
     puts "#{book.title} has been added"
   end
 
   def remove_book(isbn)
-    @books.reject! { |book| book.isbn == isbn }
-    puts "Book with ISBN #{isbn} has been removed"
+    book = @books.find { |b| b.isbn == isbn }
+    if book
+      @books.delete(book)
+      puts "Book with ISBN #{isbn} has been removed"
+    else
+      puts "Error: Book with ISBN #{isbn} does not exist."
+    end
   end
 
   # searches for books by title and optionally by author prints matching books and return them in array
@@ -32,11 +38,14 @@ class Library
   def lend_book(user_id, isbn)
     user = @users.find { |u| u.id == user_id }
     book = @books.find { |b| b.isbn == isbn }
-    
-    if user && book
-      user.borrow_book(book)
+    if !user
+      puts "Error: User with ID #{user_id} not found."
+    elsif !book
+      puts "Error: Book with ISBN #{isbn} not found."
+    elsif !book.available
+      puts "Error: '#{book.title}' is not available for lending."
     else
-      puts "User or book not found"
+      user.borrow_book(book)
     end
   end
 
@@ -44,11 +53,12 @@ class Library
   def receive_book(user_id, isbn)
     user = @users.find { |u| u.id == user_id }
     book = @books.find { |b| b.isbn == isbn }
-    
-    if user && book
-      user.return_book(book)
+    if !user
+      puts "Error: User with ID #{user_id} not found."
+    elsif !book
+      puts "Error: Book with ISBN #{isbn} not found."
     else
-      puts "User or book not found"
+      user.return_book(book)
     end
   end
 end
